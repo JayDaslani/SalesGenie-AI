@@ -1,0 +1,17 @@
+{
+    "best_model_name": "Linear Regression",
+    "best_mape": 16.4,
+    "selected_features": [
+        "Year",
+        "Month",
+        "Quarter",
+        "Month_Sin",
+        "Month_Cos",
+        "Lag_1",
+        "Lag_2",
+        "Lag_3",
+        "Is_Holiday_Month",
+        "Is_Quarter_END",
+        "Rolling_3"
+    ]
+}
