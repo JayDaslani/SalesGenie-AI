@@ -1,0 +1,143 @@
+# ==========================================
+# Secret Keys & Environment Variables (CRITICAL)
+# ==========================================
+.env
+*.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.json
+credentials.json
+*.secret.json
+
+# ==========================================
+# Virtual Environments (Nested & Root)
+# ==========================================
+**/clean_rag_env/
+**/*env/
+**/venv/
+**/.venv/
+**/env/
+**/ENV/
+
+# Pip & Dependency management
+pip-log.txt
+pip-delete-this.directory
+.pip/
+*.pip
+
+# ==========================================
+# FastAPI & Web Servers
+# ==========================================
+*.log
+logs/
+.uvicorn/
+.gunicorn/
+
+# ==========================================
+# File Storage & Temporary Artifacts
+# ==========================================
+uploads/
+**/uploads/
+storage/
+**/storage/
+media/
+files/
+tmp/
+temp/
+*.tmp
+output/
+
+# ==========================================
+# Vector Databases & Persistence Storage
+# ==========================================
+chroma/
+**/chroma/
+chroma_db/
+**/chroma_db*/
+**/rag_db/
+.chroma/
+*.chromadb
+*.sqlite3
+faiss_index/
+**/faiss_index/
+.vectorstore/
+
+# ==========================================
+# ML Models, Hugging Face, & LangChain Caches
+# ==========================================
+.cache/
+**/.cache/
+huggingface/
+hub/
+models/
+*.bin
+*.pt
+*.safetensors
+*.onnx
+.langchain.db
+.langchain.json
+
+# ==========================================
+# Python Standard Artifacts
+# ==========================================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+devel/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Linting
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ==========================================
+# System & Editor Files
+# ==========================================
+.DS_Store
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.swp
+*~
+
+# Ignore JSON files/data
+*.json
+
+# Ignore sample pdfs and dataset files
+*.pdf
+*.txt
+!Langchain/data/jay_info.txt
+
+# Ignore root data folder
+data/
+
+# Ignore this specific script
