@@ -7,18 +7,24 @@ import operator
 import os
 from dotenv import load_dotenv
 
-from tools import analyze_sales, get_forcast, get_customer_segments, get_quick_stats
+from tools import (
+    analyze_sales,
+    get_forecast,
+    get_customer_segments,
+    get_quick_stats,
+    set_active_session_id
+)
 
 load_dotenv()
 
 llm = ChatGroq(
-    model='qwen/qwen3.6-27b', 
+    model='openai/gpt-oss-20b', 
     api_key=os.getenv('GROQ_API_KEY'),
     temperature=0.3
 )
 tools = [
     analyze_sales,
-    get_forcast,
+    get_forecast,
     get_customer_segments,
     get_quick_stats
 ]
@@ -94,6 +100,7 @@ graph.add_edge('tool', 'llm')
 agent_app = graph.compile(checkpointer=memory)
 
 def chat(message: str, session_id: str='default') -> str:
+    set_active_session_id(session_id)
     config = {
         "configurable": {
             'thread_id': session_id
@@ -115,24 +122,20 @@ def chat(message: str, session_id: str='default') -> str:
 
     return "No response generated"
 
-print("=== SalesGenie AI Agent ===")
+if __name__ == "__main__":
+    print("=== SalesGenie AI Agent ===")
 
-tests = [
+    tests = [
     'What is the total revenue ?',
     'Which is the best-performing region?',
     'Give me the forecast for the next 3 months.',
     'Explain the Customer Segments.',
     'Which Category is the best ?'
 ]
-
-for q in tests:
-    print(f"Q : {q}")
-    response = chat(q)
-    print(f"A: {response[:200]}\n")
-    print('-'*40)
-
-
-
-
     
+    for q in tests:
+       print(f"Q : {q}")
+       response = chat(q)
+       print(f"A: {response[:200]}\n")
+       print('-'*40)
 
