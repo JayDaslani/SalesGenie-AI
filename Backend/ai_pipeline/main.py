@@ -26,6 +26,14 @@ from tools import (
     set_model,
     get_data_store
 )
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.model_selection import train_test_split
+import warnings
+warnings.filterwarnings('ignore')
+
+
 
 app = FastAPI(
     title='SalesGenie AI API',
@@ -84,6 +92,123 @@ def load_default_datasets():
         print("ML Model loaded!")
 
 load_default_datasets()
+
+def create_time_series_features(df: pd.DataFrame, date_col: str, sales_col: str) -> pd.DataFrame:
+    """
+    Auto features engineering 
+    for any date + sales data
+    """
+
+    monthly = df.groupby(df[date_col].dt.to_period('M'))[sales_col].sum().reset_index()
+
+    monthly.columns = ['Period', 'Total_Sales']
+    monthly = monthly.sort_values('Period')
+    monthly['Period'] = monthly['Period'].dt.to_timestamp()
+
+    monthly['Year'] = monthly['Period'].dt.year
+    monthly['Month'] = monthly['Period'].dt.month
+    monthly['Quarter'] = monthly['Period'].dt.quarter
+
+    monthly['Month_Sin'] = np.sin(2*np.pi*monthly['Month']/12)
+    monthly['Month_Cos'] = np.cos(2*np.pi*monthly['Month']/12)
+
+    monthly['Is_Holiday_Month'] = monthly['Month'].isin([11, 12, 1]).astype(int)
+    monthly['Is_Quarter_END'] = monthly['Month'].isin([3, 6, 9, 12]).astype(int)
+
+    monthly['Lag_1'] = monthly['Total_Sales'].shift(1)
+    monthly['Lag_2'] = monthly['Total_Sales'].shift(2)
+    monthly['Lag_3'] = monthly['Total_Sales'].shift(3)
+
+    monthly['Rolling_3'] = monthly['Total_Sales'].rolling(3).mean()
+
+    monthly = monthly.dropna().reset_index(drop=True)
+
+    return monthly
+
+def train_dynamic_model(monthly: pd.DataFrame) -> dict:
+    """
+    Train best model on any monthly data Returns model + info
+    """
+
+    features = [
+        'Year', 'Month', 'Quarter',
+        'Month_Sin', 'Month_Cos',
+        'Is_Holiday_Month', 'Is_Quarter_END',
+        'Lag_1', 'Lag_2', 'Lag_3', 'Rolling_3'
+    ]
+
+    available = [f for f in features if f in monthly.columns]
+
+    X = monthly[available]
+    y = monthly['Total_Sales']
+
+    if len(monthly) < 10:
+        return {
+            "sucsess": False,
+            "error": "Need at least 10 months of data"
+        }
+    
+    split = int(len(X) * 0.8)
+    X_train = X[:split]
+    X_test = X[split:]
+    y_train = y[:split]
+    y_test = y[split:]
+
+    models = {
+        "RandomForest": RandomForestRegressor(
+            n_estimators=100,
+            random_state=42
+        ),
+        "GradientBoosting": GradientBoostingRegressor(
+            n_estimators=100,
+            random_state=42
+        ),
+        "LinearRegression": LinearRegression()
+    }
+
+    best_model = None
+    best_name = None
+    best_mape = float('inf')
+
+    for name, model in models.itmes():
+        try:
+            model.fit(X_train, y_train)
+            preds = model.predict(X_test)
+            mape = mean_absolute_percentage_error(y_test, preds) * 100
+
+            if mape < best_mape:
+                best_mape = mape
+                best_model = model
+                best_name = name
+
+        except Exception as e:
+            print(f"{name} failed: {e}")
+            continue
+
+    if best_model is None:
+        return {
+            "success": False,
+            "error": "All models failed"
+        }
+    
+    model_info = {
+        "best_model_name": best_name,
+        "best_mape": round(best_mape, 2),
+        "accuracy": f"{100 - best_mape:.1f}%",
+        "selected_features": available,
+        "training_rows": len(X_train),
+        "test_rows": len(X_test)
+    }
+
+    return {
+        "success": True,
+        "model": best_model,
+        "model_info": model_info,
+        "monthly": monthly
+    }
+
+
+
 
 class ChatRequest(BaseModel):
     message: str
@@ -341,19 +466,93 @@ def get_region_sales():
         ).to_dict(orient='records')
     }
 
+@app.post("/ml/train")
+def train_model():
+    """
+    Train ML model on uploaded CSV.
+    Auto features engineering included.
+    Works with any date + sales data.
+    """
+
+    store = get_data_store()
+
+    if store['df'] is None:
+        raise HTTPException(status_code=404, detail='Upload a CSV first!')
+    
+    df = store['df']
+    cols = store.get('cols', {})
+
+    date_col = cols.get("date")
+    sales_col = cols.get("sales")
+
+    if not date_col:
+        raise HTTPException(
+            status_code=400,
+            detail='Date column not detected. '
+                    "Use /data/columns/map to set it."
+        )
+    
+    if not sales_col:
+        raise HTTPException(
+            status_code=400,
+            detail="Sales column not detected. "
+                   "Use /data/columns/map to set it."
+        )
+    
+    try:
+        print(f"Training on: {date_col}, {sales_col}")
+
+        monthly = create_time_series_features(df, date_col, sales_col)
+
+        print(f"Monthly data: {len(monthly)} rows")
+
+        result = train_dynamic_model(monthly)
+
+        if not result['success']:
+            raise HTTPException(status_code=400, detail=result["error"])
+        
+        set_model(
+            result['model'],
+            result['model_info']
+        )
+        set_monthly(result['monthly'])
+
+        return {
+            "message": "Model trained successfully!",
+            "model_name": result['model_info']['best_model_name'],
+            "accuracy": result['model_info']["accuracy"],
+            "mape": result['model_info']["best_mape"],
+            "features_used": result['model_info']['selected_features'],
+            "training_rows": result['model_info']["training_rows"]
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+
+
 @app.post("/ml/forecast")
 def get_forecast(request: ForecastRequest):
-    """Sales forecast using stored model"""
+    """
+    Sales forecast using trained model.
+    Train model first using /ml/train
+    """
     store = get_data_store()
     model = store.get('model')
     model_info = store.get('model_info')
     monthly = store.get('monthly')
 
     if model is None:
-        raise HTTPException(status_code=404, detail="ML Model not loaded")
+        raise HTTPException(status_code=404, detail="ML Model not trained. Call /ml/train first!")
     
     if monthly is None:
-        raise HTTPException(status_code=404, detail="Monthly data not available")
+        raise HTTPException(status_code=404, detail="Monthly data not available. Call /ml/train first!")
     
     try:
         features = model_info['selected_features']
