@@ -5,19 +5,37 @@ import os
 import pickle
 from langchain_core.tools import tool
 
-df = pd.read_csv('/Users/jaydasalani/Desktop/SalesGenie AI/data/train.csv', encoding='latin-1')
-
-df['Order Date'] = pd.to_datetime(df['Order Date'], format='%d/%m/%Y')
-
-rfm = pd.read_csv('/Users/jaydasalani/Desktop/SalesGenie AI/data/customer_segments.csv')
-
-with open('/Users/jaydasalani/Desktop/SalesGenie AI/data/model_info.json') as f:
-    model_info = json.load(f)
-
-with open('/Users/jaydasalani/Desktop/SalesGenie AI/data/best_model-2.pkl', 'rb') as f:
-    forecast_model = pickle.load(f)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))               
+PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..")) 
+DATA_DIR = os.getenv("DATA_DIR", os.path.join(PROJECT_ROOT, "data"))
 
 
+train_path = os.path.join(DATA_DIR, "train.csv")
+if os.path.exists(train_path):
+    df = pd.read_csv(train_path, encoding='latin-1')
+    df.columns = df.columns.str.strip()
+    df['Order Date'] = pd.to_datetime(df['Order Date'], dayfirst=True, format='mixed')
+else:
+    df = pd.DataFrame()
+
+
+rfm_path = os.path.join(DATA_DIR, "customer_segments.csv")
+rfm = pd.read_csv(rfm_path) if os.path.exists(rfm_path) else pd.DataFrame()
+
+
+info_path = os.path.join(DATA_DIR, "model_info.json")
+model_info = {}
+if os.path.exists(info_path):
+    with open(info_path, "r") as f:
+        model_info = json.load(f)
+
+
+model_path = os.path.join(DATA_DIR, "best_model-2.pkl")
+forecast_model = None
+if os.path.exists(model_path):
+    with open(model_path, "rb") as f:
+        forecast_model = pickle.load(f)
+        
 @tool
 def analyze_sales(query: str) -> str:
     """
@@ -61,8 +79,8 @@ def get_forcast(months: int = 3) -> str:
     """
 
     try:
-        monthly = pd.read_csv('/Users/jaydasalani/Desktop/SalesGenie AI/data/monthly_features.csv')
-
+        monthly_path = os.path.join(DATA_DIR, "monthly_features.csv")
+        monthly = pd.read_csv(monthly_path)
         features = model_info['selected_features']
 
         available = [f for f in features if f in monthly.columns]
