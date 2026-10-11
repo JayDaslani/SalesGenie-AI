@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+streamlit
+pandas
+numpy
+scikit-learn
+langchain
+langchain-groq
+langchain-community
+langgraph
+plotly
+python-dotenv
+fpdf2
+requests
+pydantic
+duckduckgo-search
