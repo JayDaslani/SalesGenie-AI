@@ -143,29 +143,46 @@ def get_forcast(months: int = 3) -> str:
         return f"Forecast error : {str(e)}"
     
 
+
 @tool
 def get_customer_segments(query: str = 'all') -> str:
     """Identifies customer segments.
     Use this when you need customer information.
     Categories include : Champions, Loyal, At Risk and Lost.
     """
-    result = ['Customer Segment Analysis : ']
+    global rfm
+    
+    if rfm is None or rfm.empty:
+        return "Customer segmentation (RFM) data is currently not available."
 
-    seg_count = rfm['Segment'].value_counts()
+    # Handle case-insensitive column names ('Segment' vs 'segment')
+    seg_col = 'Segment' if 'Segment' in rfm.columns else ('segment' if 'segment' in rfm.columns else None)
+    
+    if not seg_col:
+        return f"Segment column not found in RFM dataset. Available columns: {list(rfm.columns)}"
+
+    result = ['Customer Segment Analysis : ']
+    seg_count = rfm[seg_col].value_counts()
+
+    monetary_col = 'Monetary' if 'Monetary' in rfm.columns else ('monetary' if 'monetary' in rfm.columns else None)
 
     for seg, count in seg_count.items():
-        seg_data = rfm[rfm['Segment'] == seg]
-        avg_monetary = seg_data['Monetary'].mean()
-        total_rev = seg_data['Monetary'].sum()
-
-        result.append(
-            f"\n{seg}:"
-            f"\n  Count: {count}"
-            f"\n  Avg Revenue: "
-            f"${avg_monetary:,.2f}"
-            f"\n  Total Revenue: "
-            f"${total_rev:,.2f}"
-        )
+        seg_data = rfm[rfm[seg_col] == seg]
+        
+        if monetary_col:
+            avg_monetary = seg_data[monetary_col].mean()
+            total_rev = seg_data[monetary_col].sum()
+            result.append(
+                f"\n{seg}:"
+                f"\n  Count: {count}"
+                f"\n  Avg Revenue: ${avg_monetary:,.2f}"
+                f"\n  Total Revenue: ${total_rev:,.2f}"
+            )
+        else:
+            result.append(
+                f"\n{seg}:"
+                f"\n  Count: {count}"
+            )
 
     return "\n".join(result)
 
