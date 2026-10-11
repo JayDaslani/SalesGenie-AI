@@ -35,6 +35,72 @@ forecast_model = None
 if os.path.exists(model_path):
     with open(model_path, "rb") as f:
         forecast_model = pickle.load(f)
+
+
+
+def detect_columns(df: pd.DataFrame) -> dict:
+    """
+    Standardizes and detects analytical columns dynamically
+    (date, sales, customer, order, category, region, sub_category).
+    """
+    detected = {
+        'date': None,
+        'sales': None,
+        'customer': None,
+        'order': None,
+        'category': None,
+        'region': None,
+        'sub_category': None
+    }
+    
+    if df is None or df.empty:
+        return detected
+
+    cols_lower = {str(c).lower().strip().replace(' ', '_'): c for c in df.columns}
+
+    # Order Date
+    for k in ['order_date', 'date', 'orderdate', 'transaction_date', 'sale_date', 'timestamp']:
+        if k in cols_lower:
+            detected['date'] = cols_lower[k]
+            break
+
+    # Sales / Revenue
+    for k in ['sales', 'revenue', 'total_sales', 'amount', 'total_amount', 'price']:
+        if k in cols_lower:
+            detected['sales'] = cols_lower[k]
+            break
+
+    # Customer ID
+    for k in ['customer_id', 'customer', 'customerid', 'client_id', 'user_id']:
+        if k in cols_lower:
+            detected['customer'] = cols_lower[k]
+            break
+
+    # Order ID
+    for k in ['order_id', 'orderid', 'transaction_id', 'invoice_id', 'invoice']:
+        if k in cols_lower:
+            detected['order'] = cols_lower[k]
+            break
+
+    # Category
+    for k in ['category', 'product_category', 'item_category']:
+        if k in cols_lower:
+            detected['category'] = cols_lower[k]
+            break
+
+    # Region
+    for k in ['region', 'territory', 'zone', 'country', 'state']:
+        if k in cols_lower:
+            detected['region'] = cols_lower[k]
+            break
+
+    # Sub-Category
+    for k in ['sub_category', 'sub-category', 'subcategory', 'product_sub_category']:
+        if k in cols_lower:
+            detected['sub_category'] = cols_lower[k]
+            break
+
+    return detected
         
 @tool
 def analyze_sales(query: str) -> str:
