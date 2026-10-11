@@ -118,17 +118,20 @@ def chat(message: str, session_id: str='default') -> str:
 
 print("=== SalesGenie AI Agent ===")
 
-tests = [
+if __name__ == "__main__":
+    tests = [
     'What is the total revenue ?',
     'Which is the best-performing region?',
     'Give me the forecast for the next 3 months.',
     'Explain the Customer Segments.',
     'Which Category is the best ?'
 ]
-
-for q in tests:
+    for q in tests:
     print(f"Q : {q}")
     response = chat(q)
     print(f"A: {response[:200]}\n")
     print('-'*40)
+
+
+
 
