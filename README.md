@@ -82,32 +82,59 @@ an interactive web interface.
 
 ## 🏗️ Project Architecture
 SalesGenie-AI/
+
 │
+
 ├── Backend/
+
 │ └── ai_pipeline/
+
 │ ├── main.py # FastAPI endpoints
+
 │ ├── agent.py # LangGraph AI agent
+
 │ ├── tools.py # LangChain tools
+
 │ ├── insights.py # AI insights engine
+
 │ └── pdf_report.py # PDF generation
+
 │
+
 ├── Frontend/
+
 │ └── app.py # Streamlit UI (969 lines)
+
 │
+
 ├── data/
+
 │ ├── train.csv # Sales dataset
+
 │ ├── best_model-2.pkl # Trained ML model
+
 │ ├── customer_segments.csv
+
 │ ├── monthly_features.csv
+
 │ ├── model_info.json
+
 │ └── selected_features.json
+
 │
+
 ├── notebooks/
+
 │ ├── EDA.ipynb
+
 │ ├── feature_engineering.ipynb
+
 │ ├── Customer_Segmentation.ipynb
+
 │ └── Hyperparameter_tuning.ipynb
+
 │
+
 └── requirements.txt
 
 ---
