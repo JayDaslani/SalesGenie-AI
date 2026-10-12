@@ -167,11 +167,21 @@ Natural language response
 
 | Model | MAPE | Accuracy |
 |-------|------|----------|
-| Random Forest | ~8% | ~92% |
-| Gradient Boosting | ~10% | ~90% |
-| Linear Regression | ~15% | ~85% |
+| Random Forest | ~22.60% | ~77.4% |
+| Gradient Boosting | ~22.4% | ~77.6% |
+| Linear Regression | ~16.4% | ~83.6% |
 
-**Best Model: Random Forest** selected automatically
+**Best Model: Linear Regression** selected automatically
 
 ---
 
+## 🧠 Key Learnings
+
+- End-to-end AI application development
+- LangGraph stateful agent with tool calling
+- RAG pipeline integration with business data
+- ML time series forecasting with feature engineering
+- FastAPI + Streamlit full-stack architecture
+- RFM customer segmentation analysis
+
+---
