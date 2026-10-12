@@ -80,57 +80,6 @@ an interactive web interface.
 
 ---
 
-## 🏗️ Project Architecture
-SalesGenie-AI/
-
-│
-
-├── Backend/
-
-│ └── ai_pipeline/
-
-│ ├── main.py # FastAPI endpoints
-
-│ ├── agent.py # LangGraph AI agent
-
-│ ├── tools.py # LangChain tools
-
-│ ├── insights.py # AI insights engine
-
-│ └── pdf_report.py # PDF generation
-
-│
-
-├── Frontend/
-
-│ └── app.py # Streamlit UI (969 lines)
-
-│
-
-├── data/
-
-│ ├── train.csv # Sales dataset
-
-│ ├── best_model-2.pkl # Trained ML model
-
-│ ├── customer_segments.csv
-
-│ ├── monthly_features.csv
-
-│ ├── model_info.json
-
-│ └── selected_features.json
-│
-├── notebooks/
-│ ├── EDA.ipynb
-│ ├── feature_engineering.ipynb
-│ ├── Customer_Segmentation.ipynb
-│ └── Hyperparameter_tuning.ipynb
-│
-└── requirements.txt
-
----
-
 ## 🚀 How It Works
 Raw Sales CSV
 ↓
@@ -178,3 +127,51 @@ streamlit run app.py
 ```
 
 ### Access
+
+Frontend: http://localhost:8501
+Backend API: http://localhost:8000
+API Docs: http://localhost:8000/docs
+
+
+---
+
+## 📊 Dataset
+
+Uses the **Global Superstore Sales Dataset**:
+- 9,994 sales transactions
+- 4 years of data (2014–2017)
+- Features: Orders, Products, Customers,
+  Regions, Categories
+
+---
+
+## 🤖 AI Agent Architecture
+
+User Question
+↓
+LangGraph Agent (LLM + Memory)
+↓
+Tool Selection:
+├── analyze_sales → Revenue & trends
+├── get_forecast → ML predictions
+├── get_customer_segments → RFM data
+└── get_quick_stats → Quick metrics
+↓
+LLM synthesizes answer
+↓
+Natural language response
+
+---
+
+## 🎯 ML Model Performance
+
+| Model | MAPE | Accuracy |
+|-------|------|----------|
+| Random Forest | ~8% | ~92% |
+| Gradient Boosting | ~10% | ~90% |
+| Linear Regression | ~15% | ~85% |
+
+**Best Model: Random Forest** selected automatically
+
+---
+
