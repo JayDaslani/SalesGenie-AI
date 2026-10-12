@@ -79,3 +79,83 @@ an interactive web interface.
 | **Language** | Python 3.10+ |
 
 ---
+
+## 🏗️ Project Architecture
+SalesGenie-AI/
+│
+├── Backend/
+│ └── ai_pipeline/
+│ ├── main.py # FastAPI endpoints
+│ ├── agent.py # LangGraph AI agent
+│ ├── tools.py # LangChain tools
+│ ├── insights.py # AI insights engine
+│ └── pdf_report.py # PDF generation
+│
+├── Frontend/
+│ └── app.py # Streamlit UI (969 lines)
+│
+├── data/
+│ ├── train.csv # Sales dataset
+│ ├── best_model-2.pkl # Trained ML model
+│ ├── customer_segments.csv
+│ ├── monthly_features.csv
+│ ├── model_info.json
+│ └── selected_features.json
+│
+├── notebooks/
+│ ├── EDA.ipynb
+│ ├── feature_engineering.ipynb
+│ ├── Customer_Segmentation.ipynb
+│ └── Hyperparameter_tuning.ipynb
+│
+└── requirements.txt
+
+---
+
+## 🚀 How It Works
+Raw Sales CSV
+↓
+Feature Engineering + ML Training
+↓
+FastAPI Backend (10+ endpoints)
+↓
+LangGraph Agent + 4 Tools
+↓
+Streamlit Dashboard
+↓
+Insights + Forecasts + PDF Reports
+
+---
+
+## 💻 Local Setup
+
+### Prerequisites
+```bash
+Python 3.10+
+Groq API Key (free at groq.com)
+```
+
+### Installation
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/JayDaslani/SalesGenie-AI.git
+cd SalesGenie-AI
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Setup environment
+cp .env.example .env
+# Add your GROQ_API_KEY in .env
+
+# 4. Start FastAPI backend
+cd Backend/ai_pipeline
+uvicorn main:app --reload --port 8000
+
+# 5. Start Streamlit frontend (new terminal)
+cd Frontend
+streamlit run app.py
+```
+
+### Access
