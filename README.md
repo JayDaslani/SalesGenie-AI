@@ -120,21 +120,13 @@ SalesGenie-AI/
 │ ├── model_info.json
 
 │ └── selected_features.json
-
 │
-
 ├── notebooks/
-
 │ ├── EDA.ipynb
-
 │ ├── feature_engineering.ipynb
-
 │ ├── Customer_Segmentation.ipynb
-
 │ └── Hyperparameter_tuning.ipynb
-
 │
-
 └── requirements.txt
 
 ---
